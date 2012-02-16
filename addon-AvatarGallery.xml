@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="AvatarGallery" title="Avatar Gallery" version_string="0.1" version_id="0" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates/>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="load_class_controller" execute_order="1" callback_class="AvatarGallery_Listener" callback_method="load_class_controller" active="1" description=""/>
+    <listener event_id="load_class_view" execute_order="1" callback_class="AvatarGallery_Listener" callback_method="load_class_view" active="1" description=""/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <optiongroups>
+    <group group_id="avatarGallery" display_order="1" debug_only="0"/>
+    <option option_id="avatarGalleryEnable" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="avatarGallery" display_order="1"/>
+    </option>
+    <option option_id="avatarGalleryPath" edit_format="textbox" data_type="string" can_backup="1" validation_class="AvatarGallery_AvatarGallery" validation_method="validate_avatar_path">
+      <default_value>/data/avatars</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="avatarGallery" display_order="1"/>
+    </option>
+  </optiongroups>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="option_avatarGalleryEnable" version_id="0" version_string="0.1"><![CDATA[Enable Avatar Gallery]]></phrase>
+    <phrase title="option_avatarGalleryEnable_explain" version_id="0" version_string="0.1"><![CDATA[]]></phrase>
+    <phrase title="option_avatarGalleryPath" version_id="0" version_string="0.1"><![CDATA[Avatar Gallery Path]]></phrase>
+    <phrase title="option_avatarGalleryPath_explain" version_id="0" version_string="0.1"><![CDATA[]]></phrase>
+    <phrase title="option_group_avatarGallery" version_id="0" version_string="0.1"><![CDATA[Avatar Gallery]]></phrase>
+    <phrase title="option_group_avatarGallery_description" version_id="0" version_string="0.1"><![CDATA[]]></phrase>
+    <phrase title="use_custom_avatar_from_gallery" version_id="0" version_string="0.1"><![CDATA[Pick avatar from gallery]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates>
+    <template title="account_avatar_gallery" version_id="0" version_string="0.1"><![CDATA[<xen:require css="account_avatar_gallery.css" />
+
+<xen:title>{xen:phrase avatar_editor}</xen:title>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:link 'full:account/personal-details'}">{xen:phrase personal_details}</xen:breadcrumb>
+</xen:navigation>
+
+<form action="{xen:link 'account/avatar-upload'}" method="post" enctype="multipart/form-data" class="xenForm">
+
+	<xen:hook name="account_avatar">
+	
+	<xen:if is="{$visitor.avatar_date}">
+		<fieldset>
+			<dl class="ctrlUnit">
+				<dt><label>{xen:phrase current_avatar}:</label></dt>
+				<dd><xen:avatar user="$visitor" size="m" class="NoOverlay" /></dd>
+			</dl>
+
+			<dl class="ctrlUnit">
+				<dt></dt>
+				<dd><label for="ctrl_delete"><input type="checkbox" name="delete" value="1" id="ctrl_delete" /> {xen:phrase delete_current_avatar_question}</label></dd>
+			</dl>
+		</fieldset>
+	</xen:if>
+	
+	<!-- slot: after_avatar_date -->
+
+	<dl class="ctrlUnit">
+		<dt><label>{xen:phrase upload_avatar}:</label></dt>
+		<dd><input type="file" name="avatar" /></dd>
+	</dl>
+	
+	<!-- slot: after_upload_avatar -->
+
+	<xen:if is="{$xenOptions.gravatarEnable}">
+		<dl class="ctrlUnit">
+			<dt><label for="ctrl_use_gravatar">{xen:phrase use_gravatar}:</label></dt>
+			<dd><input type="checkbox" name="use_gravatar" value="1" class="Disabler" id="ctrl_use_gravatar"{xen:checked '{$visitor.gravatar}'} />
+				<span id="ctrl_use_gravatar_Disabler">
+					<input type="text" name="gravatar" value="{$visitor.gravatar}" class="textCtrl" />
+				</span>
+			</dd>
+		</dl>
+	</xen:if>
+
+	<xen:if is="{$xenOptions.avatarGalleryEnable}">
+		<dl class="ctrlUnit avatarGallery">
+			<ul>
+				<xen:foreach loop="$avatars" value="$avatar">
+					<li>
+						<input type="radio" name="chosen_avatar" value="{$avatar}" id="{$avatar}"/>
+						<label for="{$avatar}">
+							<img src="{$xenOptions.boardUrl}{$xenOptions.avatarGalleryPath}/{$avatar}"/>
+						</label>
+					</li>
+				</xen:foreach>
+			</ul>
+		</dl>
+	</xen:if>
+	
+	</xen:hook>
+
+	<dl class="ctrlUnit submitUnit">
+		<dt></dt>
+		<dd><input type="submit" value="{xen:phrase modify_avatar}" accesskey="s" class="button primary" /></dd>
+	</dl>
+
+	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+</form>]]></template>
+    <template title="account_avatar_gallery.css" version_id="0" version_string="0.1"><![CDATA[.avatarGallery {
+	max-height: 200px;
+	overflow: auto !important;
+	overflow-y: auto !important;
+}
+
+	.avatarGallery ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+		.avatarGallery ul > li {
+			display: inline-block;
+			position: relative;
+			float: left;
+			width: 96px;
+			height: 96px;
+			margin: 8px;
+			padding: 5px;
+			transition: background-color .4s;
+			-moz-transition: background-color .4s;
+			-webkit-transition: background-color .4s;
+			-o-transition: background-color .4s;
+			background-color: rgba(0, 0, 0, 0.1);
+		}
+
+		dl.avatarGallery ul > li {
+			background-color: rgba(128, 128, 128, 0.1);
+		}
+
+		.avatarGallery ul > li:hover {
+			background-color: rgba(0, 0, 0, 0.4);
+		}
+
+		dl.avatarGallery ul > li:hover {
+			background-color: rgba(128, 128, 128, 0.4);
+		}
+
+			.avatarGallery ul > li input {
+				position: absolute;
+				bottom: 2px;
+				right: 2px;
+			}
+
+			.avatarGallery ul > li img {
+				width: 96px;
+				height: 96px;
+				cursor: pointer;
+			}
+
+#ctrl_useGallery_Disabler {
+	clear: both;
+	width: 100%;
+}]]></template>
+    <template title="account_avatar_gallery_overlay" version_id="0" version_string="0.1"><![CDATA[<xen:title>{xen:phrase avatar_editor}</xen:title>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:link 'full:account/personal-details'}">{xen:phrase personal_details}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:require css="account_avatar_overlay.css" />
+<xen:require css="account_avatar_gallery.css" />
+<xen:require js="js/xenforo/avatar_editor.js" />
+
+<form action="{xen:link account/avatar-upload}" method="post" enctype="multipart/form-data"
+	class="AvatarEditor AutoInlineUploader formOverlay"
+	data-overlayClass="avatarEditor"
+	data-maxWidth="{$maxWidth}">
+
+	<div class="currentAvatar">
+		<label for="ctrl_avatar" class="avatar NoOverlay Av{$visitor.user_id}l"><img src="{xen:helper avatar, $visitor, l}" alt="{xen:phrase current_avatar}" /></label>
+	</div>
+
+	<ul class="modifyControls">
+
+		<li class="avatarOption">
+			<div class="avatarCropper avatarLabel" style="width: {$maxWidth}px; height: {$maxWidth}px">
+				<label for="ctrl_useGravatar_0" class="AvatarCropControl avatar NoOverlay Av{$visitor.user_id}l" style="width: {$maxWidth}px; height: {$maxWidth}px">
+					<img src="{xen:helper avatar, $visitor, l, custom}" style="{$maxDimension}: {$maxWidth}px" alt="{xen:phrase avatar}" />
+				</label>
+			</div>
+
+			<input type="radio" name="use_gravatar" value="0" class="Disabler radioOption" id="ctrl_useGravatar_0"{xen:checked '!{$visitor.gravatar}'} />
+
+			<div class="labelText" id="ctrl_useGravatar_0_Disabler">
+				<label for="ctrl_useGravatar_0" id="ExistingCustom">
+					{xen:phrase use_custom_avatar}
+					<span class="explain faint">
+						{xen:phrase drag_image_to_crop_then_click_okay_or_upload_new_avatar}
+					</span>
+				</label>
+
+				<label for="ctrl_avatar" class="ClickProxy" rel="#ctrl_useGravatar_0" data-allowDefault="1">{xen:phrase upload_new_custom_avatar}:</label>
+				<input type="file" name="avatar" class="textCtrl" onchange="this.blur()" id="ctrl_avatar" title="{xen:phrase supported_formats_jpeg_png_gif}" />
+				<div class="explain faint">{xen:phrase it_is_recommended_that_you_use_image_that_is_at_least_200x200_pixels}</div>
+			</div>
+		</li>
+
+		<xen:if is="{$xenOptions.gravatarEnable}">
+			<li class="avatarOption">
+				<label for="ctrl_useGravatar_1" class="avatarLabel avatar">
+					<img src="{$gravatarUrl}" class="Gravatar" alt="{xen:phrase gravatar}" width="{$maxWidth}" height="{$maxWidth}" id="GravatarImg" />
+				</label>
+	
+				<input type="radio" name="use_gravatar" value="1" class="Disabler radioOption" id="ctrl_useGravatar_1"{xen:checked '{$visitor.gravatar}'} />
+	
+				<div class="labelText" id="ctrl_useGravatar_1_Disabler">
+					<label for="ctrl_useGravatar_1">{xen:phrase use_gravatar}</label>
+	
+					<input type="email" name="gravatar" value="{$gravatarEmail}" class="textCtrl" id="GravatarEmail" placeholder="{xen:phrase gravatar_email_address}" />
+					<input type="button" class="button" id="Gravatar{xen:phrase test}" value="{xen:phrase test}"
+						data-testUrl="{xen:link account/gravatar-test}"
+						data-testSrc="#GravatarEmail"
+						data-testImg="#GravatarImg"
+						data-testErr="#GravatarError" />
+	
+					<p class="explain faint">
+						<label for="ctrl_useGravatar_1"><span id="GravatarError"></span> {xen:phrase enter_email_address_of_gravatar_you_want_to_use}</label>
+						<a class="hint" href="http://gravatar.com" rel="nofollow" target="_blank">{xen:phrase whats_gravatar}</a>
+					</p>
+				</div>
+			</li>
+		</xen:if>
+		<xen:if is="{$xenOptions.avatarGalleryEnable}">
+			<li class="avatarOption avatarGallery">
+				<label for="ctrl_useGallery" class="avatarLabel avatar">
+					{xen:phrase use_custom_avatar_from_gallery}
+				</label>
+				<input type="radio" name="use_gravatar" value="0" class="Disabler radioOption" id="ctrl_useGallery" />
+				<div id="ctrl_useGallery_Disabler">
+					<ul>
+						<xen:foreach loop="$avatars" value="$avatar">
+							<li>
+								<input type="radio" name="chosen_avatar" value="{$avatar}" id="{$avatar}"/>
+								<label for="{$avatar}">
+									<img src="{$xenOptions.boardUrl}{$xenOptions.avatarGalleryPath}/{$avatar}"/>
+								</label>
+							</li>
+						</xen:foreach>
+					</ul>
+				</div>
+			</li>
+		</xen:if>
+
+		<li class="submitUnit saveDeleteControls">
+			<label for="DeleteAvatar" class="deleteCtrl"><input type="checkbox" name="delete" value="1" id="DeleteAvatar" /> {xen:phrase delete_current_avatar_question}</label>
+			<span class="buttons">
+				<input type="submit" value="{xen:phrase okay}" class="button primary" accesskey="s" id="ctrl_save" />
+				<input type="reset" value="{xen:phrase close}" class="button OverlayCloser overlayOnly" accesskey="d" />
+			</span>
+		</li>
+	</ul>
+
+
+	<input type="hidden" name="avatar_date" value="{$visitor.avatar_date}" />
+	<input type="hidden" name="avatar_crop_x" value="{$cropX}" />
+	<input type="hidden" name="avatar_crop_y" value="{$cropY}" />
+	<input type="hidden" name="_xfToken" value="{$visitor.csrf_token_page}" />
+
+</form>]]></template>
+  </templates>
+  <bb_code_media_sites/>
+</addon>
