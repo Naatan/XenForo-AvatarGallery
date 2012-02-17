@@ -42,7 +42,13 @@ class AvatarGallery_AvatarGallery
 	public static function validate_avatar_path($value)
 	{
 		$base = dirname(__FILE__) . '/../..';
-		return (is_dir($base . $value) AND is_readable($base . $value));
+
+		if ( ! is_dir($base . $value) AND ! mkdir($base . $value))
+		{
+			return false;
+		}
+
+		return (is_readable($base . $value));
 	}
 
 }
