@@ -21,7 +21,9 @@ class AvatarGallery_AvatarGallery
 		$files = scandir($path);
 		foreach ($files AS $filename)
 		{
-			if ( ! is_file($path . '/' . $filename) OR ! in_array(exif_imagetype($path . '/' . $filename), array(IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_PNG)))
+			$ext = strtolower(substr($filename, strrpos($filename, '.')+1));
+
+			if ( ! is_file($path . '/' . $filename) OR ! in_array( $ext, array('jpg', 'jpeg', 'gif', 'png')))
 			{
 				continue;
 			}
